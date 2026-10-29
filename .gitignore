@@ -5,3 +5,7 @@ data/
 .env
 .env.*
 !.env.example
+.local/
+.vercel/
+node_modules/
+test-results/

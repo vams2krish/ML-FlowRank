@@ -1,0 +1,34 @@
+{
+  "type": "logistic regression",
+  "version": "2.1.0",
+  "features": [
+    "affinity",
+    "quality",
+    "freshness",
+    "popularity"
+  ],
+  "weights": [
+    2.98287886934518,
+    1.142667428930463,
+    0.5619550514170341,
+    0.9096594586625896
+  ],
+  "bias": -1.2796094156360263,
+  "dataset": "synthetic; no real-world performance claims",
+  "split": "chronological 80/20; feature snapshots precede feedback",
+  "split_cutoff": 24000,
+  "train_rows": 4800,
+  "test_rows": 1200,
+  "test_log_loss": 0.4727,
+  "baseline_log_loss": 0.6915,
+  "ranking": {
+    "ndcg_at_10": 0.8404,
+    "recall_at_10": 0.78,
+    "evaluated_queries": 60
+  },
+  "ranking_baseline": {
+    "ndcg_at_10": 0.514,
+    "recall_at_10": 0.5054,
+    "evaluated_queries": 60
+  }
+}

@@ -1,0 +1,27 @@
+import {chromium} from '@playwright/test';
+import {mkdir} from 'node:fs/promises';
+const base=process.env.BASE_URL||'http://127.0.0.1:8000';
+const browser=await chromium.launch({headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1120},deviceScaleFactor:1});
+await mkdir('docs/screenshots',{recursive:true});
+await page.goto(base);
+await page.locator('#video-loading').waitFor({state:'hidden',timeout:30000});
+await page.locator('#video').evaluate(v=>{v.pause();v.currentTime=3});
+await page.screenshot({path:'docs/screenshots/01-discovery-desktop.png',fullPage:true});
+await page.locator('#like').click();
+await page.waitForFunction(()=>document.getElementById('like').getAttribute('aria-pressed')==='true');
+await page.locator('#status').waitFor({state:'hidden',timeout:8000});
+await page.getByRole('button',{name:'Your insights',exact:true}).click();
+await page.waitForFunction(()=>Number(document.getElementById('metric-events').textContent)>0);
+await page.screenshot({path:'docs/screenshots/02-personal-insights.png',fullPage:true});
+await page.getByRole('button',{name:'Open guest privacy controls'}).click();
+await page.screenshot({path:'docs/screenshots/03-privacy-controls.png',fullPage:true});
+await page.locator('#close-privacy').click();
+await page.getByRole('button',{name:'For you',exact:true}).first().click();
+await page.setViewportSize({width:390,height:844});
+await page.locator('#video').evaluate(v=>{v.pause();v.currentTime=4});
+await page.screenshot({path:'docs/screenshots/04-mobile-feed.png',fullPage:true});
+// Remove only the disposable screenshot session after saving the images.
+await page.request.delete(base+'/api/privacy',{headers:{'X-FlowRank':'1'}});
+await browser.close();
+console.log('Saved four screenshots from the running product.');

@@ -1,0 +1,42 @@
+const {test,expect}=require('@playwright/test');
+test('guest discovery, feedback, preferences, export and deletion',async({page})=>{
+  const failures=[];
+  page.on('pageerror',error=>failures.push(error.message));
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Find your next spark.'})).toBeVisible();
+  await expect(page.locator('#video-loading')).toBeHidden({timeout:30000});
+  await page.locator('#video').evaluate(v=>v.pause());
+  await expect.poll(()=>page.locator('#video').evaluate(v=>v.readyState)).toBeGreaterThanOrEqual(2);
+  await page.getByRole('button',{name:'Like current video',exact:true}).click();
+  await expect(page.locator('#like')).toHaveAttribute('aria-pressed','true');
+  await page.reload();
+  await expect(page.locator('#video-loading')).toBeHidden({timeout:30000});
+  await page.locator('#video').evaluate(v=>v.pause());
+  await page.getByRole('button',{name:'Your insights',exact:true}).click();
+  await expect(page.locator('#metric-events')).not.toHaveText('0');
+  await expect(page.locator('#activity')).toContainText('Liked a discovery');
+  await page.getByRole('button',{name:'Open guest privacy controls'}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('checkbox',{name:'Enable personalization'}).uncheck();
+  await expect.poll(()=>page.request.get('/api/session').then(r=>r.json()).then(r=>r.personalized)).toBe(false);
+  const download=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Export my activity'}).click();
+  expect((await download).suggestedFilename()).toBe('flowrank-my-activity.json');
+  page.once('dialog',dialog=>dialog.accept());
+  await page.getByRole('button',{name:'Delete my activity'}).click();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await expect.poll(()=>page.request.get('/api/privacy/export').then(r=>r.json()).then(r=>r.events.length)).toBe(0);
+  expect(failures).toEqual([]);
+});
+
+test('mobile playback and topic navigation fit the viewport',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/');
+  await expect(page.locator('#video-loading')).toBeHidden({timeout:30000});
+  await page.getByRole('button',{name:'Art',exact:true}).click();
+  await expect(page.locator('#video-topic')).toContainText('ART');
+  await expect(page.locator('#video-loading')).toBeHidden();
+  await page.getByRole('button',{name:'Open guest privacy controls'}).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

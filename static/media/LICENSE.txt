@@ -1,0 +1,8 @@
+FlowRank original procedural motion studies
+
+To the extent possible under law, Vamshi Krishna Adam has waived all copyright
+and related or neighboring rights to these six motion studies and posters
+under CC0 1.0 Universal: https://creativecommons.org/publicdomain/zero/1.0/
+
+Generated with scripts/generate_media.py. No third-party video footage,
+music, likenesses, or external media service is used. Videos are silent.
